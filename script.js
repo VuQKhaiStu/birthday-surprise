@@ -1,191 +1,297 @@
-/* ================================= */
-/* CẤU HÌNH */
-/* ================================= */
-
 const PASSWORD = "486927";
-const TARGET_TIME = new Date("2026-10-27T00:00:00+07:00").getTime();
-const BIRTHDAY_MESSAGE = `Hi lô cậu iu, chúc mừng sinh nhật iu nhé! 🎂💗
-
-Chúc biu của tớ tuổi mới luôn vui vẻ, thật nhiều sức khỏe, bình an và gặp được thật nhiều điều tốt đẹp.
-
-Cảm ơn biu đã xuất hiện trong cuộc sống của tớ, làm những ngày bình thường trở nên đặc biệt hơn. Mong rằng tớ sẽ được cùng cậu tạo thêm thật nhiều kỷ niệm đáng nhớ nữa.
-
-Cứ luôn là chính cậu, luôn cười thật tươi và nhớ rằng có tớ ở đây cổ vũ cho cậu nhé.
-
-Tớ yêu cậu nhiều lắm. Happy birthday, cục cưng! ❤️`;
-
 let enteredPassword = "";
 let countdownTimer = null;
-let heartTimer = null;
-let messageTimer = null;
-let messageSession = 0;
-let unlocked = false;
+let currentQuestion = 0;
+let answers = JSON.parse(localStorage.getItem("birthdayAnswers")) || ["", "", ""];
 
-const passwordScreen = document.getElementById("passwordScreen");
-const countdownScreen = document.getElementById("countdownScreen");
-const birthdayScreen = document.getElementById("birthdayScreen");
-const passwordMessage = document.getElementById("passwordMessage");
-const passwordDots = document.querySelectorAll(".password-dots span");
-
-/* ================================= */
-/* MẬT KHẨU 6 SỐ */
-/* ================================= */
-
-document.querySelectorAll("[data-number]").forEach(button => {
-    button.addEventListener("click", () => enterNumber(button.dataset.number));
-});
-
-document.getElementById("deleteButton").addEventListener("click", deleteNumber);
-document.getElementById("replayMessageButton").addEventListener("click", typeBirthdayMessage);
-
-document.addEventListener("keydown", event => {
-    if (!passwordScreen.classList.contains("hidden")) {
-        if (/^[0-9]$/.test(event.key)) enterNumber(event.key);
-        if (event.key === "Backspace") deleteNumber();
-        if (event.key === "Enter" && enteredPassword.length === 6) checkPassword();
+const questions = [
+    {
+        icon: "💭",
+        title: "Câu 1",
+        text: "Trong những lần sinh nhật trước, có khoảnh khắc nào khiến cậu nhớ mãi đến tận bây giờ không? Kể tớ nghe với nhé 💗",
+        placeholder: "Cậu kể tớ nghe đi..."
+    },
+    {
+        icon: "🎁",
+        title: "Câu 2",
+        text: "Nếu được tự chọn một điều ước cho sinh nhật năm nay, cậu sẽ ước điều gì?",
+        placeholder: "Điều ước của cậu là..."
+    },
+    {
+        icon: "❤️",
+        title: "Câu 3",
+        text: "Nếu sinh nhật năm nay có thể lưu lại một kỷ niệm thật đẹp, cậu muốn nó sẽ là kỷ niệm như thế nào?",
+        placeholder: "Tớ muốn nghe điều này..."
     }
-});
+];
+
+const birthdayMessage = `Hi cậu, lần đầu tớ làm cái này có lẽ sẽ không được mượt cho lắm nhưng mà tớ vẫn muốn gửi gắm tình cảm này của mình vào nó để chuyển đến cậu hihi.
+
+Nếu cậu thích những kiểu như này thì sau này tớ sẽ làm nhiều thêm.
+
+Hì hì.
+
+Tớ yêu cậu ❤️`;
 
 function enterNumber(number) {
-    if (unlocked || enteredPassword.length >= 6) return;
+    if (enteredPassword.length >= 6) return;
     enteredPassword += number;
     updatePasswordDots();
-    if (enteredPassword.length === 6) setTimeout(checkPassword, 250);
+    if (enteredPassword.length === 6) {
+        setTimeout(checkPassword, 300);
+    }
 }
 
 function deleteNumber() {
-    if (unlocked) return;
     enteredPassword = enteredPassword.slice(0, -1);
     updatePasswordDots();
 }
 
 function updatePasswordDots() {
-    passwordDots.forEach((dot, index) => dot.classList.toggle("active", index < enteredPassword.length));
+    document.querySelectorAll(".password-dots span").forEach((dot, index) => {
+        dot.classList.toggle("active", index < enteredPassword.length);
+    });
 }
 
 function checkPassword() {
-    if (unlocked || enteredPassword.length !== 6) return;
+    const message = document.getElementById("passwordMessage");
+
     if (enteredPassword === PASSWORD) {
-        unlocked = true;
-        passwordMessage.textContent = "Đúng rồi, chờ món quà nhé 💗";
+        message.textContent = "Đúng rồi ❤️";
         setTimeout(() => {
-            passwordScreen.classList.add("hidden");
-            const now = Date.now();
-            if (now >= TARGET_TIME) {
-                revealBirthday();
-            } else {
-                countdownScreen.classList.remove("hidden");
-                startFloatingHearts();
-                updateCountdown();
-                countdownTimer = setInterval(updateCountdown, 250);
-            }
-        }, 650);
+            document.getElementById("passwordScreen").classList.add("hidden");
+            document.getElementById("countdownScreen").classList.remove("hidden");
+            startCountdown();
+            startFloatingHearts();
+        }, 700);
     } else {
-        passwordMessage.textContent = "Chưa đúng rồi, thử lại nhé 🥺";
-        const card = document.querySelector(".password-card");
-        card.classList.remove("shake");
-        void card.offsetWidth;
-        card.classList.add("shake");
-        enteredPassword = "";
+        message.textContent = "Sai rồi nè 🥺";
+        const box = document.querySelector(".password-box");
+        box.classList.add("shake");
+
         setTimeout(() => {
+            box.classList.remove("shake");
+            enteredPassword = "";
             updatePasswordDots();
-            passwordMessage.textContent = "";
-        }, 900);
+            message.textContent = "";
+        }, 700);
     }
 }
 
-/* ================================= */
-/* ĐẾM NGƯỢC ĐẾN 00:00 NGÀY 27/10 */
-/* ================================= */
+function startCountdown() {
+    if (countdownTimer) clearInterval(countdownTimer);
+
+    updateCountdown();
+    countdownTimer = setInterval(updateCountdown, 1000);
+}
 
 function updateCountdown() {
-    const remaining = TARGET_TIME - Date.now();
-    if (remaining <= 0) {
+    const target = new Date("2026-10-27T00:00:00+07:00");
+    const now = new Date();
+    const difference = target - now;
+
+    if (difference <= 0) {
         clearInterval(countdownTimer);
-        countdownTimer = null;
-        revealBirthday();
+        showBirthday();
         return;
     }
-    const totalSeconds = Math.floor(remaining / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
+
+    const days = Math.floor(difference / 86400000);
+    const hours = Math.floor((difference / 3600000) % 24);
+    const minutes = Math.floor((difference / 60000) % 60);
+    const seconds = Math.floor((difference / 1000) % 60);
+
+    document.getElementById("days").textContent = String(days).padStart(2, "0");
     document.getElementById("hours").textContent = String(hours).padStart(2, "0");
     document.getElementById("minutes").textContent = String(minutes).padStart(2, "0");
     document.getElementById("seconds").textContent = String(seconds).padStart(2, "0");
+
+    updateCountdownMessage(seconds);
 }
 
-/* ================================= */
-/* KHOẢNH KHẮC SINH NHẬT */
-/* ================================= */
+function updateCountdownMessage(seconds) {
+    const messages = [
+        "Một điều đặc biệt đang chờ cậu ở phía trước... 💗",
+        "Còn một chút nữa thôi... 🎂",
+        "Cậu có đoán được điều gì đang chờ không? 👀",
+        "Tớ đang rất mong đến thời khắc đó... ❤️",
+        "Hôm nay là ngày của cậu đó nha 🎀"
+    ];
 
-function revealBirthday() {
-    if (!birthdayScreen.classList.contains("hidden")) return;
-    clearInterval(countdownTimer);
-    countdownTimer = null;
-    countdownScreen.classList.add("hidden");
-    birthdayScreen.classList.remove("hidden");
+    const index = Math.floor(seconds / 10) % messages.length;
+    document.getElementById("countdownMessage").textContent = messages[index];
+}
+
+function openGame() {
+    currentQuestion = 0;
+    document.getElementById("countdownScreen").classList.add("hidden");
+    document.getElementById("gameScreen").classList.remove("hidden");
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const question = questions[currentQuestion];
+    const content = document.getElementById("questionContent");
+
+    content.innerHTML = `
+        <div class="question-icon">${question.icon}</div>
+        <p class="question-label">${question.title}</p>
+        <h2>${question.text}</h2>
+        <textarea id="answerInput" maxlength="1000" placeholder="${question.placeholder}">${answers[currentQuestion]}</textarea>
+    `;
+
+    document.getElementById("questionNumber").textContent = `${currentQuestion + 1} / ${questions.length}`;
+    document.getElementById("progressBar").style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+
+    document.getElementById("gameBackButton").style.visibility = currentQuestion === 0 ? "hidden" : "visible";
+
+    const nextButton = document.getElementById("gameNextButton");
+    nextButton.textContent = currentQuestion === questions.length - 1 ? "💌 Gửi câu trả lời" : "Tiếp tục →";
+}
+
+function saveCurrentAnswer() {
+    const input = document.getElementById("answerInput");
+
+    if (!input) return true;
+
+    const value = input.value.trim();
+
+    if (!value) {
+        input.classList.add("input-error");
+        input.focus();
+
+        setTimeout(() => {
+            input.classList.remove("input-error");
+        }, 500);
+
+        return false;
+    }
+
+    answers[currentQuestion] = value;
+    localStorage.setItem("birthdayAnswers", JSON.stringify(answers));
+    return true;
+}
+
+function nextQuestion() {
+    if (!saveCurrentAnswer()) return;
+
+    if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        renderQuestion();
+    } else {
+        submitAnswers();
+    }
+}
+
+function previousQuestion() {
+    saveCurrentAnswer();
+
+    if (currentQuestion > 0) {
+        currentQuestion--;
+        renderQuestion();
+    }
+}
+
+async function submitAnswers() {
+    const button = document.getElementById("gameNextButton");
+
+    button.disabled = true;
+    button.textContent = "Đang gửi... 💌";
+
+    const formData = new FormData();
+    formData.append("question_1", answers[0]);
+    formData.append("question_2", answers[1]);
+    formData.append("question_3", answers[2]);
+    formData.append("submitted_at", new Date().toLocaleString("vi-VN"));
+
+    try {
+        const response = await fetch("https://formspree.io/f/mdeeedyn", {
+            method: "POST",
+            body: formData,
+            headers: {
+                Accept: "application/json"
+            }
+        });
+
+        if (!response.ok) throw new Error();
+
+        localStorage.removeItem("birthdayAnswers");
+
+        document.getElementById("gameScreen").classList.add("hidden");
+        document.getElementById("countdownScreen").classList.remove("hidden");
+
+        document.getElementById("countdownMessage").textContent = "Tớ đã nhận được câu trả lời của cậu rồi 💌";
+
+    } catch (error) {
+        button.disabled = false;
+        button.textContent = "💌 Gửi câu trả lời";
+        alert("Có lỗi khi gửi câu trả lời. Kiểm tra lại kết nối mạng nhé.");
+    }
+}
+
+function showBirthday() {
+    document.getElementById("countdownScreen").classList.add("hidden");
+    document.getElementById("gameScreen").classList.add("hidden");
+    document.getElementById("birthdayScreen").classList.remove("hidden");
+
+    createFinalHearts();
     typeBirthdayMessage();
-    startFloatingHearts();
-    launchConfetti(90);
 }
 
 function typeBirthdayMessage() {
-    clearTimeout(messageTimer);
-    messageSession++;
-    const session = messageSession;
-    const output = document.getElementById("birthdayMessage");
-    output.textContent = "";
+    const element = document.getElementById("birthdayMessage");
+    element.textContent = "";
+
     let index = 0;
-    function typeNext() {
-        if (session !== messageSession) return;
-        if (index >= BIRTHDAY_MESSAGE.length) return;
-        output.textContent += BIRTHDAY_MESSAGE[index];
+
+    function type() {
+        if (index >= birthdayMessage.length) return;
+
+        element.textContent += birthdayMessage[index];
         index++;
-        messageTimer = setTimeout(typeNext, 24);
+
+        setTimeout(type, 30);
     }
-    typeNext();
+
+    type();
 }
 
-/* ================================= */
-/* TRÁI TIM BAY */
-/* ================================= */
+function replayBirthdayMessage() {
+    typeBirthdayMessage();
+}
+
+function toggleMusic() {
+    const music = document.getElementById("bgMusic");
+    const button = document.getElementById("musicButton");
+
+    if (music.paused) {
+        music.play();
+        button.textContent = "🔊";
+    } else {
+        music.pause();
+        button.textContent = "🔇";
+    }
+}
 
 function startFloatingHearts() {
-    if (heartTimer) return;
-    createHeart();
-    heartTimer = setInterval(createHeart, 650);
+    setInterval(createHeart, 1000);
 }
 
 function createHeart() {
-    const container = document.getElementById("floatingHearts");
-    const heart = document.createElement("span");
+    const heart = document.createElement("div");
     heart.className = "floating-heart";
     heart.textContent = Math.random() > 0.5 ? "♡" : "♥";
     heart.style.left = Math.random() * 100 + "vw";
-    heart.style.fontSize = 13 + Math.random() * 22 + "px";
+    heart.style.fontSize = 12 + Math.random() * 20 + "px";
     heart.style.animationDuration = 5 + Math.random() * 5 + "s";
-    heart.style.color = ["#d94f8d", "#ef78aa", "#ffffff", "#c75b89"][Math.floor(Math.random() * 4)];
-    container.appendChild(heart);
-    setTimeout(() => heart.remove(), 10500);
+
+    document.getElementById("floatingHearts").appendChild(heart);
+
+    setTimeout(() => heart.remove(), 10000);
 }
 
-/* ================================= */
-/* CONFETTI SINH NHẬT */
-/* ================================= */
-
-function launchConfetti(amount) {
-    const container = document.getElementById("celebrationEffects");
-    const colors = ["#f06fa4", "#f7c6dc", "#ffffff", "#d8a6e8", "#f3c66b", "#e98dba"];
-    for (let i = 0; i < amount; i++) {
-        const piece = document.createElement("span");
-        piece.className = "confetti";
-        piece.style.left = Math.random() * 100 + "vw";
-        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-        piece.style.animationDuration = 3 + Math.random() * 4 + "s";
-        piece.style.animationDelay = Math.random() * 1.2 + "s";
-        piece.style.transform = `rotate(${Math.random() * 360}deg)`;
-        container.appendChild(piece);
-        setTimeout(() => piece.remove(), 8500);
+function createFinalHearts() {
+    for (let i = 0; i < 60; i++) {
+        setTimeout(createHeart, i * 80);
     }
 }

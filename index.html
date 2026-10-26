@@ -3,67 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#f8dce9">
-    <title>Một điều đặc biệt dành cho cậu 💗</title>
+    <title>For You 🎂</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- HIỆU ỨNG NỀN -->
-    <div id="floatingHearts" aria-hidden="true"></div>
-    <div id="celebrationEffects" aria-hidden="true"></div>
+    <div id="floatingHearts"></div>
 
-    <!-- NHẬP MẬT KHẨU -->
+    <audio id="bgMusic" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <button id="musicButton" onclick="toggleMusic()">🔇</button>
+
     <section id="passwordScreen" class="screen">
-        <div class="glass-card password-card">
-            <div class="top-heart">♡</div>
-            <p class="eyebrow">A LITTLE SURPRISE</p>
-            <h1>Chỉ dành cho cậu</h1>
-            <p class="subtitle">Nhập mật khẩu để mở món quà nhỏ nhé 💌</p>
-            <div class="password-dots" aria-label="Mật khẩu gồm 6 chữ số">
-                <span></span><span></span><span></span><span></span><span></span><span></span>
+        <div class="password-box">
+            <div class="lock-heart">♡</div>
+            <h2>Mật khẩu bí mật</h2>
+            <p class="password-subtitle">Nhập 6 chữ số để mở món quà nhé 💗</p>
+            <div class="password-dots">
+                <span></span><span></span><span></span>
+                <span></span><span></span><span></span>
             </div>
-            <p id="passwordMessage" class="status-message" aria-live="polite"></p>
+            <p id="passwordMessage"></p>
             <div class="keypad">
-                <button type="button" data-number="1">1</button><button type="button" data-number="2">2</button><button type="button" data-number="3">3</button>
-                <button type="button" data-number="4">4</button><button type="button" data-number="5">5</button><button type="button" data-number="6">6</button>
-                <button type="button" data-number="7">7</button><button type="button" data-number="8">8</button><button type="button" data-number="9">9</button>
-                <span class="keypad-empty"></span><button type="button" data-number="0">0</button><button type="button" id="deleteButton" aria-label="Xóa số cuối">⌫</button>
+                <button onclick="enterNumber('1')">1</button>
+                <button onclick="enterNumber('2')">2</button>
+                <button onclick="enterNumber('3')">3</button>
+                <button onclick="enterNumber('4')">4</button>
+                <button onclick="enterNumber('5')">5</button>
+                <button onclick="enterNumber('6')">6</button>
+                <button onclick="enterNumber('7')">7</button>
+                <button onclick="enterNumber('8')">8</button>
+                <button onclick="enterNumber('9')">9</button>
+                <div></div>
+                <button onclick="enterNumber('0')">0</button>
+                <button onclick="deleteNumber()">⌫</button>
             </div>
         </div>
     </section>
 
-    <!-- MÀN HÌNH ĐẾM NGƯỢC -->
     <section id="countdownScreen" class="screen hidden">
-        <div class="glass-card countdown-card">
-            <p class="eyebrow">COUNTING DOWN TO YOUR DAY</p>
-            <div class="countdown-heart" aria-hidden="true">♡</div>
-            <h1>Chờ một chút nhé, bé yêu</h1>
-            <p class="subtitle">Tớ đang giữ một điều thật đặc biệt cho cậu.</p>
-            <p class="target-date">27 THÁNG 10 · 00:00</p>
-            <div class="countdown" role="timer" aria-live="off">
-                <div class="time-unit"><span id="hours">00</span><small>GIỜ</small></div>
-                <span class="time-colon">:</span>
-                <div class="time-unit"><span id="minutes">00</span><small>PHÚT</small></div>
-                <span class="time-colon">:</span>
-                <div class="time-unit"><span id="seconds">00</span><small>GIÂY</small></div>
+        <div class="countdown-content">
+            <div class="countdown-birthday">🎂</div>
+            <p class="eyebrow">A LITTLE SURPRISE FOR YOU</p>
+            <h1>Điều tuyệt vời</h1><br>đang đến gần rồi...</h1>
+            <div class="countdown-box">
+                <div>
+                    <span id="days">00</span>
+                    <small>NGÀY</small>
+                </div>
+                <span class="countdown-colon">:</span>
+                <div>
+                    <span id="hours">00</span>
+                    <small>GIỜ</small>
+                </div>
+                <span class="countdown-colon">:</span>
+                <div>
+                    <span id="minutes">00</span>
+                    <small>PHÚT</small>
+                </div>
+                <span class="countdown-colon">:</span>
+                <div>
+                    <span id="seconds">00</span>
+                    <small>GIÂY</small>
+                </div>
             </div>
-            <p class="countdown-note">Đúng nửa đêm, món quà sẽ được mở ra. ♡</p>
-            <div class="tiny-stars" aria-hidden="true">✦　·　♡　·　✦</div>
+            <p id="countdownMessage">Một điều đặc biệt đang chờ cậu ở phía trước... 💗</p>
+            <button class="game-button" onclick="openGame()">🎮 Chơi một trò nhỏ với tớ</button>
         </div>
     </section>
 
-    <!-- MÀN HÌNH CHÚC MỪNG SINH NHẬT -->
+    <section id="gameScreen" class="screen hidden">
+        <div class="game-card">
+            <div class="game-top">
+                <span>💌 Một vài câu hỏi cho cậu</span>
+                <span id="questionNumber">1 / 3</span>
+            </div>
+
+            <div class="progress">
+                <div id="progressBar"></div>
+            </div>
+
+            <div id="questionContent"></div>
+
+            <div class="game-controls">
+                <button id="gameBackButton" onclick="previousQuestion()">←</button>
+                <button id="gameNextButton" onclick="nextQuestion()">Tiếp tục →</button>
+            </div>
+        </div>
+    </section>
+
     <section id="birthdayScreen" class="screen hidden">
         <div class="birthday-card">
-            <div class="birthday-balloons" aria-hidden="true"><span>🎈</span><span>🎀</span><span>🎈</span></div>
-            <div class="birthday-heart" aria-hidden="true">💗</div>
+            <div class="birthday-balloons" aria-hidden="true">
+                <span>🎈</span>
+                <span>🎀</span>
+                <span>🎈</span>
+            </div>
+
+            <div class="birthday-heart">💗</div>
+
             <p class="eyebrow">TODAY IS ALL ABOUT YOU</p>
+
             <h1>Chúc mừng sinh nhật</h1>
-            <h2>bạn iu của tớ🎂</h2>
-            <div class="divider-heart" aria-hidden="true">♡ · ♡ · ♡</div>
-            <p id="birthdayMessage" class="birthday-message" aria-live="polite"></p>
-            <button type="button" id="replayMessageButton" class="replay-button">💌 Đọc lại lời chúc</button>
-            <p class="signature">Tớ yêu cậu nhiều lắm hihi❤️</p>
+            <h2>bạn iu của tớ 🎂</h2>
+
+            <div class="divider-heart">♡ · ♡ · ♡</div>
+
+            <p id="birthdayMessage" class="birthday-message"></p>
+
+            <button id="replayMessageButton" class="replay-button" onclick="replayBirthdayMessage()">
+                💌 Đọc lại lời chúc
+            </button>
+
+            <p class="signature">Tớ yêu cậu nhiều lắm hihi ❤️</p>
             <p class="birthday-date">27 · 10 · 2026</p>
         </div>
     </section>
