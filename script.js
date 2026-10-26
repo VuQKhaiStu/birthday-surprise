@@ -295,3 +295,14 @@ function createFinalHearts() {
         setTimeout(createHeart, i * 80);
     }
 }
+document.addEventListener("keydown", function(e) {
+    if (document.getElementById("passwordScreen").classList.contains("hidden")) return;
+
+    if (/^[0-9]$/.test(e.key)) {
+        enterNumber(e.key);
+    } else if (e.key === "Backspace") {
+        deleteNumber();
+    } else if (e.key === "Enter") {
+        checkPassword();
+    }
+});
