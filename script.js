@@ -25,13 +25,15 @@ const questions = [
     }
 ];
 
-const birthdayMessage = `Hi cậu, lần đầu tớ làm cái này có lẽ sẽ không được mượt cho lắm nhưng mà tớ vẫn muốn gửi gắm tình cảm này của mình vào nó để chuyển đến cậu hihi.
+const birthdayMessage = `Hi lô cậu iu, chúc mừng sinh nhật iu nhé! 🎂💗
 
-Nếu cậu thích những kiểu như này thì sau này tớ sẽ làm nhiều thêm.
+Chúc biu của tớ tuổi mới luôn vui vẻ, thật nhiều sức khỏe, bình an và gặp được thật nhiều điều tốt đẹp.
 
-Hì hì.
+Cảm ơn biu đã xuất hiện trong cuộc sống của tớ, làm những ngày bình thường trở nên đặc biệt hơn. Mong rằng tớ sẽ được cùng cậu tạo thêm thật nhiều kỷ niệm đáng nhớ nữa.
 
-Tớ yêu cậu ❤️`;
+Cứ luôn là chính cậu, luôn cười thật tươi và nhớ rằng có tớ ở đây cổ vũ cho cậu nhé.
+
+Tớ yêu cậu nhiều lắm. Happy birthday, cục cưng! ❤️`;
 
 function enterNumber(number) {
     if (enteredPassword.length >= 6) return;
