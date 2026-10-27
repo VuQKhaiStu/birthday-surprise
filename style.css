@@ -600,7 +600,7 @@ body {
     min-height: 130px;
     text-align: left;
     white-space: pre-line;
-    font-family: "Segoe UI", Arial, sans-serif;
+    font-family: 'Times New Roman', Times, serif;
     font-size: 19px;
     line-height: 1.9;
     color: var(--text)
